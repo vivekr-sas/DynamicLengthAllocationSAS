@@ -1,5 +1,5 @@
 
-%macro trim2(indsn=WORK.LEAP_SALES_ANALYSISS, outdsn=LEAP_SALES_ANALYSIS);
+%macro trim2(indsn="Input Data", outdsn="OutPut Data");
 %let dsid=%sysfunc(open(&indsn,i));
 %let nvars=%sysfunc(attrn(&dsid,nvars));
 %let nobs=%sysfunc(attrn(&dsid,nobs));
