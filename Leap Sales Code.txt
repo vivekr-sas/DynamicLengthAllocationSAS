@@ -1,0 +1,37 @@
+
+%macro trim2(indsn=WORK.LEAP_SALES_ANALYSISS, outdsn=LEAP_SALES_ANALYSIS);
+%let dsid=%sysfunc(open(&indsn,i));
+%let nvars=%sysfunc(attrn(&dsid,nvars));
+%let nobs=%sysfunc(attrn(&dsid,nobs));
+%let label=%sysfunc(attrc(&dsid,label));
+%let rc=%sysfunc(close(&dsid));
+%if %length(&label)>0 %then %let label= label=&label;
+%macro help(num);
+%global var type len;
+%let dsid=%sysfunc(open(&indsn,i));
+%let var=%sysfunc(varname(&dsid,&num));
+%let type=%sysfunc(vartype(&dsid,&num));
+%let len=%sysfunc(varlen(&dsid,&num));
+%let rc=%sysfunc(close(&dsid));
+%mend help;
+options varlenchk=nowarn;
+%let all=;
+proc sql noprint;
+ %do i=1 %to &nvars;
+ %help(&i);
+ %if &type=C %then
+ %do;
+ select cats('$',max(length(&var))) into :len from &indsn(keep=&var);
+ %if &len=$. %then %let len=$1;
+ %end;
+ %let all=&all &var &len;
+ %end;
+quit;
+data &outdsn(&label);
+ length &all;
+ set &indsn;
+run;
+options varlenchk=warn;
+%mend trim2;
+%trim2;
+
